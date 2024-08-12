@@ -3,14 +3,10 @@ name: Add License Header
 on:
   push:
     branches:
-      - 'staging'
-      - 'development'
-      - 'production'
+      - '**'
   pull_request:
     branches:
-      - 'staging'
-      - 'development'
-      - 'production'
+      - '**'
 
 jobs:
   add-license:
