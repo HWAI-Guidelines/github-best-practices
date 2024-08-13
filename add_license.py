@@ -15,7 +15,7 @@ file_comment_styles = {
     '.sql': '--', '.ps1': '#', '.config': '<!--', '.xml': '<!--', 
     '.xaml': '<!--', '.php': '//', '.rb': '#', '.go': '//', 
     '.java': '//', '.kt': '//', '.c': '//', '.cpp': '//', '.h': '//', 
-    '.swift': '//', '.sas': '*'
+    '.swift': '//', '.sas': '*', '.pynb': '#'
 }
 
 def generate_license_header(comment_style):
