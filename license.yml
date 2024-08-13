@@ -1,47 +1,56 @@
-name: Add License Header
+import os
 
-on:
-  push:
-    branches:
-      - '**'
-  pull_request:
-    branches:
-      - '**'
+# Define the copyright text
+license_text = "All content, trademarks, and data on this document are the property of Healthworks Analytics, LLC and are protected by applicable intellectual property laws. Unauthorized use, reproduction, or distribution of this material is strictly prohibited."
 
-jobs:
-  add-license:
-    runs-on: ubuntu-latest
+# Define the directory where your repository is located
+repo_dir = '.'  # Use the relative path for GitHub Actions
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+# Define the file extensions and their respective comment styles
+file_comment_styles = {
+    '.py': '#', '.js': '//', '.jsx': '//', '.ts': '//', '.tsx': '//', 
+    '.json': '//', '.html': '<!--', '.css': '/*', '.scss': '/*', 
+    '.yaml': '#', '.yml': '#', '.sh': '#', '.bat': 'REM', '.env': '#', 
+    '.cs': '//', '.csproj': '<!--', '.vb': "'", 'Dockerfile': '#', 
+    '.sql': '--', '.ps1': '#', '.config': '<!--', '.xml': '<!--', 
+    '.xaml': '<!--', '.php': '//', '.rb': '#', '.go': '//', 
+    '.java': '//', '.kt': '//', '.c': '//', '.cpp': '//', '.h': '//', 
+    '.swift': '//', '.sas': '*', '.pynb': '#'
+}
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
+def generate_license_header(comment_style):
+    if comment_style in ['#', '//', '--', 'REM']:
+        return f"{comment_style} {license_text}\n"
+    elif comment_style == '<!--':
+        return f"{comment_style} {license_text} -->\n"
+    elif comment_style == '/*' or comment_style == '*':
+        return f"{comment_style} {license_text} */\n"
+    else:
+        raise ValueError("Unsupported comment style")
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
+def add_license_to_file(file_path, comment_style):
+    try:
+        with open(file_path, 'r+', encoding='utf-8') as file:
+            content = file.read()
+            license_header = generate_license_header(comment_style)
+            # Ensure the license header is added only if it's not already present
+            if not content.startswith(license_header):
+                file.seek(0, 0)
+                file.write(license_header + content)
+                print(f"Added license header to {file_path}")
+    except Exception as e:
+        print(f"Failed to add license header to {file_path}: {e}")
 
-      - name: Run license script
-        run: |
-          python add_license.py
+# Walk through the directory
+for root, dirs, files in os.walk(repo_dir):
+    for file in files:
+        # Skip README.md, add_license.py, and package.json
+        if file in ['README.md', 'add_license.py', 'package.json']:
+            continue
+        # Process only the specified file types
+        for ext, comment_style in file_comment_styles.items():
+            if file.endswith(ext) or file.lower() == 'dockerfile':
+                add_license_to_file(os.path.join(root, file), comment_style)
+                break
 
-      - name: Commit changes
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-          git add .
-          # Reset the .github/workflows/license.yml file and other excluded files
-          git reset HEAD .github/workflows/license.yml README.md add_license.py
-          # Commit and push only if there are changes
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m 'Add license header to files'
-            git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref }}
-          fi
-        env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+#print("All files have been updated.")
