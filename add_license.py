@@ -15,7 +15,7 @@ file_comment_styles = {
     '.sql': '--', '.ps1': '#', '.config': '<!--', '.xml': '<!--', 
     '.xaml': '<!--', '.php': '//', '.rb': '#', '.go': '//', 
     '.java': '//', '.kt': '//', '.c': '//', '.cpp': '//', '.h': '//', 
-    '.swift': '//', '.sas': '*', '.pynb': '#'
+    '.swift': '//', '.sas': '*', '.ipynb': '#'
 }
 
 def generate_license_header(comment_style):
@@ -23,7 +23,7 @@ def generate_license_header(comment_style):
         return f"{comment_style} {license_text}\n"
     elif comment_style == '<!--':
         return f"{comment_style} {license_text} -->\n"
-    elif comment_style == '/*' or comment_style == '*':
+    elif comment_style in ['/*', '*']:
         return f"{comment_style} {license_text} */\n"
     else:
         raise ValueError("Unsupported comment style")
