@@ -9,17 +9,16 @@ repo_dir = '.'  # Use the relative path for GitHub Actions
 
 # Define the file extensions and their respective comment styles
 file_comment_styles = {
-    '.py': '#', '.js': '//', '.jsx': '//', '.ts': '//', '.tsx': '//',
-    '.html': '<!--', '.css': '/*', '.scss': '/*',
-    '.yaml': '#', '.yml': '#', '.sh': '#', '.bat': 'REM', '.env': '#',
-    '.cs': '//', '.csproj': '<!--', '.vb': "'", 'Dockerfile': '#',
-    '.sql': '--', '.ps1': '#', '.config': '<!--', '.xml': '<!--',
-    '.xaml': '<!--', '.php': '//', '.rb': '#', '.go': '//',
-    '.java': '//', '.kt': '//', '.c': '//', '.cpp': '//', '.h': '//',
-    '.swift': '//', '.pynb': '#', '.jsx': '//'
+    '.py': '#', '.js': '//', '.jsx': '//', '.ts': '//', '.tsx': '//', 
+    '.html': '<!--', '.css': '/*', '.scss': '/*', 
+    '.yaml': '#', '.yml': '#', '.sh': '#', '.bat': 'REM', '.env': '#', 
+    '.cs': '//', '.csproj': '<!--', '.vb': "'", 'Dockerfile': '#', 
+    '.sql': '--', '.ps1': '#', '.config': '<!--', '.xml': '<!--', 
+    '.xaml': '<!--', '.php': '//', '.rb': '#', '.go': '//', 
+    '.java': '//', '.kt': '//', '.c': '//', '.cpp': '//', '.h': '//', 
+    '.swift': '//', 'package.json': '//'
 }
 
-# Function to generate the license header
 def generate_license_header(comment_style):
     if comment_style in ['#', '//', '--', 'REM']:
         return f"{comment_style} {license_text}\n"
@@ -30,8 +29,7 @@ def generate_license_header(comment_style):
     else:
         raise ValueError("Unsupported comment style")
 
-# Function to add a license to text-based files
-def add_license_to_text_file(file_path, comment_style):
+def add_license_to_file(file_path, comment_style):
     try:
         with open(file_path, 'r+', encoding='utf-8') as file:
             content = file.read()
@@ -44,16 +42,17 @@ def add_license_to_text_file(file_path, comment_style):
     except Exception as e:
         print(f"Failed to add license header to {file_path}: {e}")
 
-# Function to add a license to JSON files
-def add_license_to_json_file(file_path):
+def add_license_to_ipynb(file_path):
     try:
         with open(file_path, 'r+', encoding='utf-8') as file:
-            content = json.load(file)
-            file.seek(0)
-            file.truncate()
-            json.dump(content, file, indent=4)
-            file.write(f"\n// {license_text}\n")
-            print(f"Added license header to {file_path}")
+            notebook = json.load(file)
+            # Add license to the notebook metadata if it's not already present
+            if 'license' not in notebook.get('metadata', {}):
+                notebook.setdefault('metadata', {})['license'] = license_text
+                file.seek(0)
+                json.dump(notebook, file, ensure_ascii=False, indent=4)
+                file.truncate()
+                print(f"Added license header to {file_path}")
     except Exception as e:
         print(f"Failed to add license header to {file_path}: {e}")
 
@@ -64,12 +63,13 @@ for root, dirs, files in os.walk(repo_dir):
         if file in ['README.md', 'add_license.py']:
             continue
         file_path = os.path.join(root, file)
-        if file.endswith('.json') or file == 'package.json':
-            add_license_to_json_file(file_path)
+        if file.endswith('.ipynb'):
+            add_license_to_ipynb(file_path)
         else:
+            # Process only the specified file types
             for ext, comment_style in file_comment_styles.items():
                 if file.endswith(ext) or file.lower() == 'dockerfile':
-                    add_license_to_text_file(file_path, comment_style)
+                    add_license_to_file(file_path, comment_style)
                     break
 
 #print("All files have been updated.")
