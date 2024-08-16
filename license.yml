@@ -40,7 +40,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m 'Add license header to files'
+            git commit -m 'Add license header to files [skip ci]'
             git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref }}
           fi
         env:
