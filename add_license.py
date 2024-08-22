@@ -16,7 +16,7 @@ file_comment_styles = {
     '.sql': '--', '.ps1': '#', '.config': '<!--', '.xml': '<!--', 
     '.xaml': '<!--', '.php': '//', '.rb': '#', '.go': '//', 
     '.java': '//', '.kt': '//', '.c': '//', '.cpp': '//', '.h': '//', 
-    '.swift': '//', 'package.json': '//'
+    '.swift': '//', 'package.json': '//', '.sas': '*', '.SAS': '*'
 }
 
 def generate_license_header(comment_style):
@@ -26,6 +26,8 @@ def generate_license_header(comment_style):
         return f"{comment_style} {license_text} -->\n"
     elif comment_style in ['/*']:
         return f"{comment_style} {license_text} */\n"
+    elif comment_style == '*':  # For SAS files
+        return f"* {license_text};\n"
     else:
         raise ValueError("Unsupported comment style")
 
