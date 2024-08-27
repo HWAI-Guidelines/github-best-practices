@@ -16,7 +16,7 @@ file_comment_styles = {
     '.sql': '--', '.ps1': '#', '.config': '<!--', '.xml': '<!--', 
     '.xaml': '<!--', '.php': '//', '.rb': '#', '.go': '//', 
     '.java': '//', '.kt': '//', '.c': '//', '.cpp': '//', '.h': '//', 
-    '.swift': '//', 'package.json': '//', '.sas': '*', '.SAS': '*'
+    '.swift': '//'
 }
 
 def generate_license_header(comment_style):
@@ -26,8 +26,6 @@ def generate_license_header(comment_style):
         return f"{comment_style} {license_text} -->\n"
     elif comment_style in ['/*']:
         return f"{comment_style} {license_text} */\n"
-    elif comment_style == '*':  # For SAS files
-        return f"* {license_text};\n"
     else:
         raise ValueError("Unsupported comment style")
 
@@ -68,7 +66,7 @@ for root, dirs, files in os.walk(repo_dir):
         if file.endswith('.ipynb'):
             add_license_to_ipynb(file_path)
         else:
-            # Process only the specified file types
+            # Process only the specified file types and exclude .json files
             for ext, comment_style in file_comment_styles.items():
                 if file.endswith(ext) or file.lower() == 'dockerfile':
                     add_license_to_file(file_path, comment_style)
